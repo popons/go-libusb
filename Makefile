@@ -1,8 +1,8 @@
 include $(GOROOT)/src/Make.$(GOARCH)
 
-TARG=main
+TARG=libusb
 
-CGOFILES=main.go
+CGOFILES=libusb.go
 
 CGO_LDFLAGS=-llibusb
 
