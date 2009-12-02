@@ -10,3 +10,5 @@ include $(GOROOT)/src/Make.pkg
 test: install test.go
 	$(GC) test.go
 	$(LD) -o $@ test.$O
+cleanall:clean
+	rm test
