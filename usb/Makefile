@@ -7,7 +7,7 @@ CGO_LDFLAGS=-lusb
 
 include $(GOROOT)/src/Make.pkg
 
-test: install test.go
+test: install
 	$(GC) test.go
 	$(LD) -o $@ test.$O
 cleanall:clean
