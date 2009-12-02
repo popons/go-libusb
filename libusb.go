@@ -1,15 +1,18 @@
 package libusb
 
-// #include<libusb-1.0/libusb.h>
+// #include<usb.h>
 import "C"
 
-import "fmt";
+//import "fmt";
 
-var ctx *C.libusb_context;
 
-func main()
+func Init() (int,int)
 {
-    C.libusb_init(&ctx);
-    fmt.Printf("アホの坂田\n");
+    C.usb_init();
+
+    bn := C.usb_find_busses();
+    dn := C.usb_find_devices();
+
+    return int(bn),int(dn);
 }
 
