@@ -5,6 +5,9 @@ import "fmt"
 
 func main()
 {
-    b,d := libusb.Init();
-    fmt.Printf("bus-num=%d\ndev-num=%d\n",b,d);
+    libusb.Init();
+    for _,d := range libusb.Enum()
+    {
+        fmt.Printf("BUS:%s DEVICE:%s VID:%04x PID:%04x\n",d.Bus,d.Device,d.Vid,d.Pid);
+    }
 }
