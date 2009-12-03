@@ -101,30 +101,27 @@ func (dev *Device) Close() int
     dev.handle = nil;
     return r;
 }
-func (dev *Device) Vendor() string
+func (dev *Device) String(key int) string
 {
     buf := make([]C.char,256);
 
-    C.usb_get_string_simple(dev.handle,
-            C.int(dev.descriptor.iManufacturer),
+    C.usb_get_string_simple(
+            dev.handle,
+            C.int(key),
             &buf[0],
             C.size_t(len(buf)));
 
     return C.GoString(&buf[0]);
+
 }
-func (dev *Device) Product() string
+func (self *Device) Vendor() string
 {
-    buf := make([]C.char,256);
-
-    C.usb_get_string_simple(dev.handle,
-            C.int(dev.descriptor.iProduct),
-            &buf[0],
-            C.size_t(len(buf)));
-
-    return C.GoString(&buf[0]);
+    return self.String(int(self.descriptor.iManufacturer));
 }
-
-
+func (self *Device) Product() string
+{
+    return self.String(int(self.descriptor.iProduct));
+}
 func LastError() string
 {
     return C.GoString(C.usb_strerror());
