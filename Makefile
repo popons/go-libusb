@@ -10,5 +10,6 @@ include $(GOROOT)/src/Make.pkg
 bench: install
 	$(GC) bench.go
 	$(LD) -o $@ bench.$O
+	./bench
 cleanall:clean
 	rm bench
