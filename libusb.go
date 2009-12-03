@@ -68,7 +68,7 @@ type Device struct
 {
     Info;
     handle *C.usb_dev_handle;
-    //descriptor C.usb_device_descriptor;
+    descriptor _Cstruct_usb_device_descriptor;
     io.ReadWriteCloser;
 }
 
@@ -87,7 +87,7 @@ func Open(info Info) (*Device)
                 rdev = new(Device);
                 rdev.Info = info;
                 rdev.handle = h;
-//                rdev.descriptor = dev.descriptor;
+                rdev.descriptor = dev.descriptor;
                 return rdev;
             }
         }
@@ -101,11 +101,35 @@ func (dev *Device) Close() int
     dev.handle = nil;
     return r;
 }
-//func (dev *Device) Product() string
-//{
-//    buf := make([]byte,1024);
-//
-//    C.usb_get_string_simple(dev.handle,dev.descriptor.iProduct,buf,len(buf));
-//
-//    return string(buf);
-//}
+func (dev *Device) Vendor() string
+{
+    buf := make([]C.char,256);
+
+    C.usb_get_string_simple(dev.handle,
+            C.int(dev.descriptor.iManufacturer),
+            &buf[0],
+            C.size_t(len(buf)));
+
+    return C.GoString(&buf[0]);
+}
+func (dev *Device) Product() string
+{
+    buf := make([]C.char,256);
+
+    C.usb_get_string_simple(dev.handle,
+            C.int(dev.descriptor.iProduct),
+            &buf[0],
+            C.size_t(len(buf)));
+
+    return C.GoString(&buf[0]);
+}
+
+
+func LastError() string
+{
+    return C.GoString(C.usb_strerror());
+}
+func (*Device) LastError() string
+{
+    return LastError();
+}
