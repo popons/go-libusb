@@ -2,9 +2,9 @@ package libusb
 
 // #include<usb.h>
 import "C"
+import "unsafe"
 
 import "fmt";
-import "io";
 //import "container/list";
 
 
@@ -66,7 +66,7 @@ type Device struct
     Info;
     handle *C.usb_dev_handle;
     descriptor _Cstruct_usb_device_descriptor;
-    io.ReadWriteCloser;
+    timeout int;
 }
 
 func Open(info Info) (*Device)
@@ -81,10 +81,7 @@ func Open(info Info) (*Device)
                int(dev.descriptor.idProduct) == info.Pid
             {
                 h := C.usb_open(dev);
-                rdev = new(Device);
-                rdev.Info = info;
-                rdev.handle = h;
-                rdev.descriptor = dev.descriptor;
+                rdev = &Device{info,h,dev.descriptor,-1};
                 return rdev;
             }
         }
@@ -126,4 +123,21 @@ func LastError() string
 func (*Device) LastError() string
 {
     return LastError();
+}
+
+func (self *Device) BulkWrite(ep int ,dat []byte) int
+{
+    return int( C.usb_bulk_write(self.handle,
+                                    C.int(ep),
+                                  (*C.char)(unsafe.Pointer(&dat[0])),
+                                    C.int(len(dat)),
+                                    C.int(self.timeout)) );
+}
+func (self *Device) BulkRead(ep int ,dat []byte) int
+{
+    return int( C.usb_bulk_read( self.handle,
+                                    C.int(ep),
+                                  (*C.char)(unsafe.Pointer(&dat[0])),
+                                    C.int(len(dat)),
+                                    C.int(self.timeout)) );
 }
