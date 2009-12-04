@@ -7,8 +7,3 @@ CGO_LDFLAGS=-lusb
 
 include $(GOROOT)/src/Make.pkg
 
-bench: install
-	$(GC) bench.go
-	$(LD) -o $@ bench.$O
-cleanall:clean
-	rm bench

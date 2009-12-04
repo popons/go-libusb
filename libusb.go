@@ -5,7 +5,7 @@ import "C"
 
 import "fmt";
 import "io";
-import "container/list";
+//import "container/list";
 
 
 func Init() (int,int)
@@ -32,10 +32,8 @@ func Enum() []Info
 
     bus := C.usb_get_busses();
     n := 0;
-    for ;bus != nil; bus=bus.next
-    {
-        for dev := bus.devices ; dev!=nil ; dev = dev.next
-        {
+    for ;bus != nil; bus=bus.next {
+        for dev := bus.devices ; dev!=nil ; dev = dev.next {
             n += 1;
         }
     }
@@ -44,12 +42,10 @@ func Enum() []Info
     bus = C.usb_get_busses();
     n =0;
 
-    for ;bus != nil; bus=bus.next
-    {
+    for ;bus != nil; bus=bus.next {
         busname := C.GoString(&bus.dirname[0]);
 
-        for dev := bus.devices ; dev!=nil ; dev = dev.next
-        {
+        for dev := bus.devices ; dev!=nil ; dev = dev.next {
             devname := C.GoString(&dev.filename[0]);
 
             var info Info;
