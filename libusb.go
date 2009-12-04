@@ -5,6 +5,7 @@ import "C"
 
 import "fmt";
 import "io";
+import "container/list";
 
 
 func Init() (int,int)
