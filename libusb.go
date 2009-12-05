@@ -63,30 +63,53 @@ func Enum() []Info
 
 type Device struct
 {
-    Info;
+    *Info;
     handle *C.usb_dev_handle;
     descriptor _Cstruct_usb_device_descriptor;
     timeout int;
 }
 
-func Open(info Info) (*Device)
+/// open usb device with info
+//func Open(info Info) (*Device)
+//{
+//    var rdev *Device = nil;
+//
+//    for bus := C.usb_get_busses() ; bus != nil ; bus=bus.next
+//    {
+//        for dev := bus.devices ; dev!=nil ; dev = dev.next
+//        {
+//            if int(dev.descriptor.idVendor)  == info.Vid &&
+//               int(dev.descriptor.idProduct) == info.Pid
+//            {
+//                h := C.usb_open(dev);
+//                rdev = &Device{&info,h,dev.descriptor,10000};
+//                return rdev;
+//            }
+//        }
+//    }
+//    return rdev;
+//}
+/// open usb device with info
+func Open(vid , pid int) (*Device)
 {
-    var rdev *Device = nil;
-
     for bus := C.usb_get_busses() ; bus != nil ; bus=bus.next
     {
         for dev := bus.devices ; dev!=nil ; dev = dev.next
         {
-            if int(dev.descriptor.idVendor)  == info.Vid &&
-               int(dev.descriptor.idProduct) == info.Pid
+            if int(dev.descriptor.idVendor)  == vid &&
+               int(dev.descriptor.idProduct) == pid
             {
                 h := C.usb_open(dev);
-                rdev = &Device{info,h,dev.descriptor,-1};
+                rdev := &Device{
+                    &Info{
+                        C.GoString(&bus.dirname[0]),
+                        C.GoString(&dev.filename[0]),vid,pid},
+                    h, dev.descriptor,10000};
                 return rdev;
             }
         }
     }
-    return rdev;
+    return nil;
 }
 
 func (dev *Device) Close() int
@@ -140,4 +163,13 @@ func (self *Device) BulkRead(ep int ,dat []byte) int
                                   (*C.char)(unsafe.Pointer(&dat[0])),
                                     C.int(len(dat)),
                                     C.int(self.timeout)) );
+}
+func (self *Device) Configuration(conf int) int
+{
+    return int( C.usb_set_configuration(self.handle, C.int(conf)) );
+    //return int( C.usb_set_configuration( (*C.uint)(123), C.int(conf)) );
+}
+func (self *Device) Interface (ifc int) int
+{
+    return int( C.usb_claim_interface(self.handle, C.int(ifc)));
 }
