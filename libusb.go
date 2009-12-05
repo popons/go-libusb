@@ -173,3 +173,24 @@ func (self *Device) Interface (ifc int) int
 {
     return int( C.usb_claim_interface(self.handle, C.int(ifc)));
 }
+
+const (
+    USB_TYPE_STANDARD   =(0x00 << 5);
+    USB_TYPE_CLASS      =(0x01 << 5);
+    USB_TYPE_VENDOR     =(0x02 << 5);
+    USB_TYPE_RESERVED   =(0x03 << 5);
+);
+
+func (self *Device) ControlMsg (reqtype int, req int, value int, index int, dat []byte) int
+{
+    return int( C.usb_control_msg(    self.handle,
+                                    C.int(reqtype),
+                                    C.int(req),
+                                    C.int(value),
+                                    C.int(index),
+                                  (*C.char)(unsafe.Pointer(&dat[0])),
+                                    C.int(len(dat)),
+                                    C.int(self.timeout)));
+}
+
+

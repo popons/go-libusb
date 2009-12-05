@@ -11,8 +11,6 @@ func enum()
 
     Init();
 
-    //buf := make([]byte,1024);
-
     for i,info := range Enum()
     {
         fmt.Printf("======================================================\n");
@@ -23,15 +21,6 @@ func enum()
             fmt.Printf(" Vendor     : %s\n",dev.Vendor());
             fmt.Printf(" Product    : %s\n",dev.Product());
             fmt.Printf(" Last Error : %s\n",dev.LastError());
-//            l := dev.BulkRead(1,buf);
-//            fmt.Printf(" Last Error : %s\n",dev.LastError());
-//            fmt.Printf("%d read\n",l);
-//            if l>=0{
-//                for _,d := range buf[0:l]{
-//                    fmt.Printf("%08X ",d);
-//                }
-//            }
-
             dev.Close();
         }else{
             os.Exit(1);
@@ -51,10 +40,13 @@ func conf()
     println("dev.dev=",device.Device);
     println("dev.handle=",device.handle);
     fmt.Printf(" Last Error : %s\n",device.LastError());
+
     var r int;
+
     r = device.Configuration(1);
     println("Configuration=" , r);
     fmt.Printf(" Last Error : %s\n",device.LastError());
+
     device.Interface(0);
     println("Interface=" , r);
     fmt.Printf(" Last Error : %s\n",device.LastError());
@@ -63,8 +55,8 @@ func conf()
 
 
 var methods = []method {
-//enum,
-conf,
+enum,
+//conf,
 };
 
 
