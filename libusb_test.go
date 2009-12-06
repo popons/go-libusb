@@ -62,11 +62,11 @@ enum,
 
 func TestAll(t *testing.T)
 {
-    for i,m := range methods
+    for i,method := range methods
     {
         println("==============================================");
         println("========= test ",i);
         println("==============================================");
-        m();
+        method();
     }
 }
