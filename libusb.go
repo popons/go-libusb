@@ -63,7 +63,7 @@ type Device struct {
 	*Info
 	handle     *C.usb_dev_handle
 	descriptor C.struct_usb_device_descriptor
-	timeout    int
+	Timeout    int
 }
 
 type UsbError struct {
@@ -171,15 +171,32 @@ func (self *Device) BulkWrite(ep int, dat []byte) int {
 		C.int(ep),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
 func (self *Device) BulkRead(ep int, dat []byte) int {
 	return int(C.usb_bulk_read(self.handle,
 		C.int(ep),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
+
+func (self *Device) InterruptWrite(ep int, dat []byte) int {
+	return int(C.usb_interrupt_write(self.handle,
+		C.int(ep),
+		(*C.char)(unsafe.Pointer(&dat[0])),
+		C.int(len(dat)),
+		C.int(self.Timeout)))
+}
+
+func (self *Device) InterruptRead(ep int, dat []byte) int {
+	return int(C.usb_interrupt_read(self.handle,
+		C.int(ep),
+		(*C.char)(unsafe.Pointer(&dat[0])),
+		C.int(len(dat)),
+		C.int(self.Timeout)))
+}
+
 func (self *Device) Configuration(conf int) int {
 	return int(C.usb_set_configuration(self.handle, C.int(conf)))
 	//return int( C.usb_set_configuration( (*C.uint)(123), C.int(conf)) );
@@ -203,5 +220,5 @@ func (self *Device) ControlMsg(reqtype int, req int, value int, index int, dat [
 		C.int(index),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
