@@ -66,6 +66,35 @@ type Device struct {
 	timeout    int
 }
 
+type UsbError struct {
+	ErrorDesc string	
+}
+
+func (u UsbError) Error() string {
+	return u.ErrorDesc
+}
+
+func OpenAllCallback(vid, pid int, callback func (*Device, error)) {
+	for bus := C.usb_get_busses(); bus != nil; bus = bus.next {
+		for dev := bus.devices; dev != nil; dev = dev.next {
+			if int(dev.descriptor.idVendor) == vid &&
+				int(dev.descriptor.idProduct) == pid {
+				h := C.usb_open(dev)
+				if h == nil {
+					callback(nil, UsbError{LastError()})
+				} else {
+					rdev := &Device{
+						&Info{
+							C.GoString(&bus.dirname[0]),
+							C.GoString(&dev.filename[0]), vid, pid},
+						h, dev.descriptor, 10000}
+					callback(rdev, nil)
+				}
+			}
+		}
+	}
+}
+
 /// open usb device with info
 //func Open(info Info) (*Device)
 //{
