@@ -63,7 +63,36 @@ type Device struct {
 	*Info
 	handle     *C.usb_dev_handle
 	descriptor C.struct_usb_device_descriptor
-	timeout    int
+	Timeout    int
+}
+
+type UsbError struct {
+	ErrorDesc string	
+}
+
+func (u UsbError) Error() string {
+	return u.ErrorDesc
+}
+
+func OpenAllCallback(vid, pid int, callback func (*Device, error)) {
+	for bus := C.usb_get_busses(); bus != nil; bus = bus.next {
+		for dev := bus.devices; dev != nil; dev = dev.next {
+			if int(dev.descriptor.idVendor) == vid &&
+				int(dev.descriptor.idProduct) == pid {
+				h := C.usb_open(dev)
+				if h == nil {
+					callback(nil, UsbError{LastError()})
+				} else {
+					rdev := &Device{
+						&Info{
+							C.GoString(&bus.dirname[0]),
+							C.GoString(&dev.filename[0]), vid, pid},
+						h, dev.descriptor, 10000}
+					callback(rdev, nil)
+				}
+			}
+		}
+	}
 }
 
 /// open usb device with info
@@ -142,15 +171,32 @@ func (self *Device) BulkWrite(ep int, dat []byte) int {
 		C.int(ep),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
 func (self *Device) BulkRead(ep int, dat []byte) int {
 	return int(C.usb_bulk_read(self.handle,
 		C.int(ep),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
+
+func (self *Device) InterruptWrite(ep int, dat []byte) int {
+	return int(C.usb_interrupt_write(self.handle,
+		C.int(ep),
+		(*C.char)(unsafe.Pointer(&dat[0])),
+		C.int(len(dat)),
+		C.int(self.Timeout)))
+}
+
+func (self *Device) InterruptRead(ep int, dat []byte) int {
+	return int(C.usb_interrupt_read(self.handle,
+		C.int(ep),
+		(*C.char)(unsafe.Pointer(&dat[0])),
+		C.int(len(dat)),
+		C.int(self.Timeout)))
+}
+
 func (self *Device) Configuration(conf int) int {
 	return int(C.usb_set_configuration(self.handle, C.int(conf)))
 	//return int( C.usb_set_configuration( (*C.uint)(123), C.int(conf)) );
@@ -174,5 +220,5 @@ func (self *Device) ControlMsg(reqtype int, req int, value int, index int, dat [
 		C.int(index),
 		(*C.char)(unsafe.Pointer(&dat[0])),
 		C.int(len(dat)),
-		C.int(self.timeout)))
+		C.int(self.Timeout)))
 }
